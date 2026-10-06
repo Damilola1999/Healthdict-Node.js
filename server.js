@@ -153,7 +153,7 @@ app.post("/api/appointments", async (req, res) => {
 
   try {
     const appointment = await Appointment.create({ name, email, phone, type, notes, date, time });
-    sendEmails(appointment); // fire and forget
+    sendEmails(appointment).catch((err) => console.error("Email error:", err.message)); // fire and forget
     res.status(201).json({ message: "Appointment request received.", id: appointment._id });
   } catch (err) {
     if (err.code === 11000)
