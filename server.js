@@ -3,7 +3,7 @@ const express = require("express");
 const cors = require("cors");
 const helmet = require("helmet");
 const rateLimit = require("express-rate-limit");
-const mongoose = require("mangoose");
+const mongoose = require("mongoose");
 const { Resend } = require("resend");
 
 const app = express();
@@ -45,14 +45,14 @@ app.use(
     cors({
         origin(origin, cb) {
             if (!origin || allowedOrigins.includes(origin)) return cb(null, true);
-            cb(new Error("Not allowed by cors CORS"));
+            cb(new Error("Not allowed by CORS"));
         },
     })
 );
 
 app.use(
     "/api/",
-    rateLimit({ windowMs: 15 * 60 * 1000, max: 60, standardHeaders: true, legacyHeaders: fales})
+    rateLimit({ windowMs: 15 * 60 * 1000, max: 60, standardHeaders: true, legacyHeaders: false})
 );
 
 /* ---------- Database ---------- */
@@ -75,7 +75,7 @@ appointmentSchema.index({ date:1, time: 1 }, { unique: true });
 const Appointment = mongoose.model("Appointment", appointmentSchema);
 
 /* ---------- Email (Resend uses HTTPS, so it works on Render's free tier) ---------- */
-const resend = process.env.Resend_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
+const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
 const FROM = process.env.MAIL_FROM || "Nourish by Hannah <onboarding@resend.dev>";
 
 const esc = (s = "") =>
@@ -87,7 +87,7 @@ const prettyDate = (ymd) =>
     });
 
     async function sendEmails(a) {
-        if (!resend) return console.warn("RESEND_API_KEY missiing - skipping emails");
+        if (!resend) return console.warn("RESEND_API_KEY missing - skipping emails");
         const when = `${prettyDate(a.date)} at ${a.time}`;
 
 
